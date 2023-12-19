@@ -6,8 +6,10 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup  
 import os
 import requests 
+
 def main():
-    grab_data()
+    #grab_data()
+    write_data_minio()
     
 
 def grab_data() -> None:
@@ -60,22 +62,31 @@ def grab_data() -> None:
 
 
 def write_data_minio():
-    """
-    This method put all Parquet files into Minio
-    Ne pas faire cette méthode pour le moment
-    """
+
     client = Minio(
         "localhost:9000",
         secure=False,
         access_key="minio",
         secret_key="minio123"
     )
-    bucket: str = "NOM_DU_BUCKET_ICI"
+    bucket: str = "data"
     found = client.bucket_exists(bucket)
     if not found:
         client.make_bucket(bucket)
+
     else:
         print("Bucket " + bucket + " existe déjà")
+
+    local_directory = './data/raw/'
+
+    for root, dirs, files in os.walk(local_directory):
+        for filename in files:
+            local_path = os.path.join(root, filename)
+            object_name = os.path.relpath(local_path, local_directory)
+
+            client.fput_object(bucket, object_name, local_path)
+            print(f"Fichier {object_name} ajouté au bucket {bucket}")
+
 
 if __name__ == '__main__':
     sys.exit(main())
