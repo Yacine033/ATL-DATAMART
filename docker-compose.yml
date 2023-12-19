@@ -17,9 +17,12 @@ services:
     networks:
       - spark_network
   db:
-    image: postgres
+    image: postgres:latest
     restart: always
+    ports:
+      - "15432:5432"
     environment:
+      POSTGRES_USERNAME: admin
       POSTGRES_PASSWORD: admin
     volumes:
     - pgdata:/var/lib/postgresql/data
