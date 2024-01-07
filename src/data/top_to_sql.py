@@ -4,6 +4,16 @@ import sys
 
 import pandas as pd
 from sqlalchemy import create_engine
+ 
+
+from minio import Minio
+import urllib.request
+import pandas as pd
+import sys
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup  
+import os
+import requests 
 
 
 def write_data_postgres(dataframe: pd.DataFrame) -> bool:
@@ -22,7 +32,7 @@ def write_data_postgres(dataframe: pd.DataFrame) -> bool:
         "dbms_username": "postgres",
         "dbms_password": "admin",
         "dbms_ip": "localhost",
-        "dbms_port": "5432",
+        "dbms_port": "15432",
         "dbms_database": "nyc_warehouse",
         "dbms_table": "nyc_raw"
     }
@@ -70,6 +80,7 @@ def main() -> None:
 
     for parquet_file in parquet_files:
         parquet_df: pd.DataFrame = pd.read_parquet(os.path.join(folder_path, parquet_file), engine='pyarrow')
+
         clean_column_name(parquet_df)
         if not write_data_postgres(parquet_df):
             del parquet_df
